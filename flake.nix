@@ -9,6 +9,11 @@
 				description = "A template for a python project using pdm";
 			};
 
+			python-shell = {
+				path = ./python-shell;
+				description = "A template to create a python shell with certain packages";
+			};
+
 		};
 	};
 }
