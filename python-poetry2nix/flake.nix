@@ -20,12 +20,6 @@
 				# python interpreter to use
 				python-interp = pkgs.python311;
 
-				poetry-env = p2n.mkPoetryEnv {
-					python = python-interp;
-					projectDir = ./.;
-					preferWheels = true;
-				};
-
 				poetry-app = p2n.mkPoetryApplication {
 					python = python-interp;
 					projectDir = ./.;
@@ -40,7 +34,7 @@
 
 				devShells.default = pkgs.mkShell {
 					inherit system;
-					buildInputs = with pkgs; [ poetry ] ++ [ poetry-env ];
+					buildInputs = with pkgs; [ poetry ] ++ [ poetry-app.dependencyEnv ];
 				};
 			});
 }
