@@ -10,3 +10,4 @@ nix flake init -t github:JonBoyleCoding/nix-templates#template
 
 - `python-pdm` A dream2nix flake for a pdm-based python project
 - `python-shell` A simple shell script containing python and some packages
+- `python-poetry2nix` A template for python package using poetry.
