@@ -19,6 +19,11 @@
 				description = "A template for a python project using poetry2nix";
 			};
 
+			default-package-flake = {
+				path = ./default-package-flake;
+				description = "A basic flake for building a default.nix package";
+			}
+
 		};
 	};
 }
