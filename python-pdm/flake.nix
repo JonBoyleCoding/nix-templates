@@ -15,7 +15,7 @@
 			let
 				# import nixpkgs
 				pkgs = import nixpkgs { config.allowUnfree = true; inherit system; };
-				lib = pkgs.lib;
+				inherit (pkgs) lib;
 
 				# python interpreter to use
 				python-interp = pkgs.python311;
@@ -27,7 +27,7 @@
 					pdm.lockfile = ./pdm.lock;
 					pdm.pyproject = ./pyproject.toml;
 
-					deps = {...}: {
+					deps = _ : {
 						python = python-interp;
 					};
 
@@ -49,15 +49,24 @@
 				};
 
 				package = evaled.config.public;
+
+				pre-commit-check = nix-precommit-hooks.lib.${system}.run {
+					src = ./.;
+					hooks = {
+						ruff.enable = true;
+						statix.enable = true;
+					};
+				};
 			in
 			{
-
 				packages = {
 					default = package;
 				};
 
 				devShells.default = pkgs.mkShell {
 					inherit system;
+					inherit (pre-commit-check) shellHook;
+
 					buildInputs = with pkgs; [ python-interp pdm package ];
 				};
 			});
