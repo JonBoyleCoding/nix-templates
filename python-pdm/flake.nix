@@ -26,12 +26,15 @@
 
 					pdm.lockfile = ./pdm.lock;
 					pdm.pyproject = ./pyproject.toml;
-					pdm.pythonInterpreter = python-interp;
+
+					deps = {...}: {
+						python = python-interp;
+					};
 
 					mkDerivation = {
 						src = ./.;
 						buildInputs = [
-							config.deps.python3.pkgs.pdm-backend
+							python-interp.pkgs.pdm-backend
 						];
 					};
 				};
@@ -44,16 +47,18 @@
 						packageSets.nixpkgs = pkgs;
 					};
 				};
+
+				package = evaled.config.public;
 			in
 			{
 
 				packages = {
-					default = evaled.config.public;
+					default = package;
 				};
 
 				devShells.default = pkgs.mkShell {
 					inherit system;
-					buildInputs = with pkgs; [ python-interp pdm ];
+					buildInputs = with pkgs; [ python-interp pdm package ];
 				};
 			});
 }
