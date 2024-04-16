@@ -22,7 +22,7 @@
 			default-package-flake = {
 				path = ./default-package-flake;
 				description = "A basic flake for building a default.nix package";
-			}
+			};
 
 		};
 	};
