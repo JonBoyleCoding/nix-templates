@@ -9,7 +9,7 @@
 		nix-precommit-hooks.url = "github:cachix/pre-commit-hooks.nix";
 	};
 
-	outputs = {self, nixpkgs, flake-utils, dream2nix, ...} :
+	outputs = {self, nixpkgs, flake-utils, dream2nix, nix-precommit-hooks, ...} :
 		let
 			supportedSystems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
 		in
