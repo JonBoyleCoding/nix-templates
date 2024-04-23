@@ -5,6 +5,8 @@
 
 		dream2nix.url = "github:nix-community/dream2nix";
 		dream2nix.inputs.nixpkgs.follows = "nixpkgs";
+
+		nix-precommit-hooks.url = "github:cachix/pre-commit-hooks.nix";
 	};
 
 	outputs = {self, nixpkgs, flake-utils, dream2nix, ...} :
