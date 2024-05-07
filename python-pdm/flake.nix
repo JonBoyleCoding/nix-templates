@@ -71,5 +71,12 @@
 
 					buildInputs = with pkgs; [ python-interp pdm package ];
 				};
+
+				devShells.no-package = pkgs.mkShell {
+					inherit system;
+					inherit (pre-commit-check) shellHook;
+
+					buildInputs = with pkgs; [ python-interp pdm ];
+				};
 			});
 }
