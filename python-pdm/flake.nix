@@ -21,6 +21,7 @@
 
 				# python interpreter to use
 				python-interp = pkgs.python311;
+				python-interp-pkgs = python-interp.pkgs;
 
 				# dream2nix
 				module = {config, lib, dream2nix, ...}: {
@@ -37,16 +38,30 @@
 						src = ./.;
 						buildInputs = [
 							python-interp.pkgs.pdm-backend
+							python-interp.pkgs.editables
 						];
+					};
+
+					buildPythonPackage = {
+						format = lib.mkForce "pyproject";
 					};
 				};
 
 				# dream2nix eval
-				evaled = lib.evalModules {
-					modules = [module];
+				evaled = dream2nix.lib.evalModules {
+					packageSets.nixpkgs = pkgs;
+					modules = [
+						module
+						{
+							paths = {
+								projectRoot = ./.;
+								package = ./.;
+								projectRootFile = "flake.nix";
+							};
+						}
+					];
 					specialArgs = {
 						inherit dream2nix;
-						packageSets.nixpkgs = pkgs;
 					};
 				};
 
@@ -68,8 +83,9 @@
 				devShells.default = pkgs.mkShell {
 					inherit system;
 					inherit (pre-commit-check) shellHook;
+					inputsFrom = [self.packages.${system}.default.devShell];
 
-					buildInputs = with pkgs; [ python-interp pdm package ];
+					buildInputs = with pkgs; [  ];
 				};
 
 				devShells.no-package = pkgs.mkShell {
