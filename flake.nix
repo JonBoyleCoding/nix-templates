@@ -22,6 +22,11 @@
         path = ./default-package-flake;
         description = "A basic flake for building a default.nix package";
       };
+
+      rust-bevy = {
+        path = ./rust-bevy;
+        description = "A NixOS development flake for Bevy development.";
+      };
     };
   };
 }
