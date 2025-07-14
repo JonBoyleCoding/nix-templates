@@ -82,6 +82,27 @@
 
 				package = evaled.config.public;
 
+				dev-group = package.config.groups.dev.packages or {};
+
+				python-dev-packages =
+					builtins.concatLists
+					(
+						builtins.attrValues
+						(
+							builtins.mapAttrs
+							(
+								_name: versions:
+									builtins.attrValues (
+										builtins.mapAttrs (
+											_version: pkg: pkg.public
+										)
+										versions
+									)
+							)
+							dev-group
+						)
+					);
+
 				pre-commit-check =
 					nix-precommit-hooks.lib.${system}.run {
 						src = ./.;
@@ -103,7 +124,7 @@
 						inherit (pre-commit-check) shellHook;
 						inputsFrom = [self.packages.${system}.default.devShell];
 
-						buildInputs = with pkgs; [];
+						buildInputs = with pkgs; [ruff python-dev-packages];
 					};
 
 				devShells.no-package =
