@@ -20,92 +20,97 @@
 		supportedSystems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
 	in
 		flake-utils.lib.eachSystem supportedSystems (system: let
-			# import nixpkgs
-			pkgs = import nixpkgs {
-				config.allowUnfree = true;
-				inherit system;
-			};
-			inherit (pkgs) lib;
+				# import nixpkgs
+				pkgs =
+					import nixpkgs {
+						config.allowUnfree = true;
+						inherit system;
+					};
+				inherit (pkgs) lib;
 
-			# python interpreter to use
-			python-interp = pkgs.python312;
-			python-interp-pkgs = python-interp.pkgs;
+				# python interpreter to use
+				python-interp = pkgs.python312;
+				python-interp-pkgs = python-interp.pkgs;
 
-			# dream2nix
-			module = {
-				config,
-				lib,
-				dream2nix,
-				...
-			}: {
-				imports = [dream2nix.modules.dream2nix.WIP-python-pdm];
+				# dream2nix
+				module = {
+					config,
+					lib,
+					dream2nix,
+					...
+				}: {
+					imports = [dream2nix.modules.dream2nix.WIP-python-pdm];
 
-				pdm.lockfile = ./pdm.lock;
-				pdm.pyproject = ./pyproject.toml;
+					pdm.lockfile = ./pdm.lock;
+					pdm.pyproject = ./pyproject.toml;
 
-				deps = _: {
-					python = python-interp;
+					deps = _: {
+						python = python-interp;
+					};
+
+					mkDerivation = {
+						src = ./.;
+						buildInputs = [
+							python-interp.pkgs.pdm-backend
+							python-interp.pkgs.editables
+						];
+					};
+
+					buildPythonPackage = {
+						format = lib.mkForce "pyproject";
+					};
 				};
 
-				mkDerivation = {
-					src = ./.;
-					buildInputs = [
-						python-interp.pkgs.pdm-backend
-						python-interp.pkgs.editables
-					];
-				};
-
-				buildPythonPackage = {
-					format = lib.mkForce "pyproject";
-				};
-			};
-
-			# dream2nix eval
-			evaled = dream2nix.lib.evalModules {
-				packageSets.nixpkgs = pkgs;
-				modules = [
-					module
-					{
-						paths = {
-							projectRoot = ./.;
-							package = ./.;
-							projectRootFile = "flake.nix";
+				# dream2nix eval
+				evaled =
+					dream2nix.lib.evalModules {
+						packageSets.nixpkgs = pkgs;
+						modules = [
+							module
+							{
+								paths = {
+									projectRoot = ./.;
+									package = ./.;
+									projectRootFile = "flake.nix";
+								};
+							}
+						];
+						specialArgs = {
+							inherit dream2nix;
 						};
-					}
-				];
-				specialArgs = {
-					inherit dream2nix;
+					};
+
+				package = evaled.config.public;
+
+				pre-commit-check =
+					nix-precommit-hooks.lib.${system}.run {
+						src = ./.;
+						hooks = {
+							ruff.enable = true;
+							mypy.enable = true;
+							statix.enable = true;
+						};
+					};
+			in {
+				packages = {
+					default = package;
 				};
-			};
 
-			package = evaled.config.public;
+				devShells.default =
+					pkgs.mkShell {
+						inherit system;
+						inherit (pre-commit-check) shellHook;
+						inputsFrom = [self.packages.${system}.default.devShell];
 
-			pre-commit-check = nix-precommit-hooks.lib.${system}.run {
-				src = ./.;
-				hooks = {
-					ruff.enable = true;
-					mypy.enable = true;
-					statix.enable = true;
-				};
-			};
-		in {
-			packages = {
-				default = package;
-			};
+						buildInputs = with pkgs; [];
+					};
 
-			devShells.default = pkgs.mkShell {
-				inherit system;
-				inherit (pre-commit-check) shellHook;
-				inputsFrom = [self.packages.${system}.default.devShell];
+				devShells.no-package =
+					pkgs.mkShell {
+						inherit system;
+						inherit (pre-commit-check) shellHook;
 
-				buildInputs = with pkgs; [];
-			};
-
-			devShells.no-package = pkgs.mkShell {
-				inherit system;
-				inherit (pre-commit-check) shellHook;
-
-				buildInputs = with pkgs; [python-interp pdm];
-			};
-		});
+						buildInputs = with pkgs; [python-interp pdm];
+					};
+			});
 }
