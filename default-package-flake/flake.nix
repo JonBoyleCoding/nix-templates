@@ -11,13 +11,12 @@
 		...
 	}:
 		flake-utils.lib.eachDefaultSystem (system: let
-				pkgs =
-					import nixpkgs {
-						system = system;
-					};
+			pkgs = import nixpkgs {
+				system = system;
+			};
 
-				default_package = pkgs.callPackage ./default.nix {};
-			in {
-				packages.default = default_package;
-			});
+			default_package = pkgs.callPackage ./default.nix {};
+		in {
+			packages.default = default_package;
+		});
 }
