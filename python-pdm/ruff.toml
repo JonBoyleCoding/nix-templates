@@ -1,3 +1,6 @@
+[lint]
+extend-select = ["I", "ICN", "NPY", "RET", "SIM", "TID"]
+
 [format]
 indent-style = "tab"
 quote-style = "double"
