@@ -82,6 +82,36 @@
 
 				package = evaled.config.public;
 
+				# Extract dev dependencies from dream2nix package dynamically
+				devPackages = let
+					devGroup = package.config.groups.dev.packages or {};
+					# Extract the actual built package from each versioned entry
+					extractPackage = name: versions: let
+						versionsList = builtins.attrValues versions;
+						firstVersion =
+							if builtins.length versionsList > 0
+							then builtins.head versionsList
+							else null;
+						# Try to get the actual package derivation
+						actualPackage =
+							if firstVersion != null && firstVersion ? public
+							then firstVersion.public
+							else if firstVersion != null && firstVersion ? package
+							then firstVersion.package
+							else firstVersion;
+					in
+						actualPackage;
+					# Get all packages and filter out nulls
+					allPackages = builtins.attrValues (builtins.mapAttrs extractPackage devGroup);
+					validPackages =
+						builtins.filter (
+							pkg:
+								pkg != null && (lib.isDerivation pkg || (builtins.isAttrs pkg && pkg ? outPath))
+						)
+						allPackages;
+				in
+					validPackages;
+
 				pre-commit-check =
 					nix-precommit-hooks.lib.${system}.run {
 						src = ./.;
@@ -102,7 +132,7 @@
 						inherit (pre-commit-check) shellHook;
 						inputsFrom = [self.packages.${system}.default.devShell];
 
-						buildInputs = with pkgs; [];
+						buildInputs = with pkgs; [] ++ devPackages;
 					};
 
 				devShells.no-package =
