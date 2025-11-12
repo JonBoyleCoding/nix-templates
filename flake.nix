@@ -61,6 +61,16 @@
 							end-of-file-fixer.enable = true;
 						};
 					};
+
+				claude-pre-commit-hook = pkgs.writeShellScriptBin "claude-pre-commit-check" ''
+					file_path=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
+					if [[ -z "$file_path" ]] || [[ ! -f "$file_path" ]]; then
+						exit 0
+					fi
+
+					# Run pre-commit on the specific file
+					${pkgs.pre-commit}/bin/pre-commit run --files "$file_path" 2>&1 || exit 2
+				'';
 			in {
 				devShells.default =
 					pkgs.mkShell {
@@ -68,6 +78,7 @@
 						buildInputs = with pkgs; [
 							alejandra
 							nixfmt-rfc-style
+							claude-pre-commit-hook
 						];
 					};
 			});

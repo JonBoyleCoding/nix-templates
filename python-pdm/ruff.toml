@@ -1,3 +1,6 @@
+preview = true
+line-length = 120
+
 [lint]
 extend-select = [
 	"I",     # isort
