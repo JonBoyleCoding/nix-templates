@@ -1,12 +1,12 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "PostToolUse": [
       {
         "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "claude-pre-commit-check"
+            "command": "claude-post-commit-check"
           }
         ]
       }

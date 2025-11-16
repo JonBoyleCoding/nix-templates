@@ -35,14 +35,22 @@
 						preferWheels = true;
 					};
 
-				claude-pre-commit-hook = pkgs.writeShellScriptBin "claude-pre-commit-check" ''
+				claude-post-commit-hook = pkgs.writeShellScriptBin "claude-post-commit-check" ''
 					file_path=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
 					if [[ -z "$file_path" ]] || [[ ! -f "$file_path" ]]; then
 						exit 0
 					fi
 
-					# Run pre-commit on the specific file
-					${pkgs.pre-commit}/bin/pre-commit run --files "$file_path" 2>&1 || exit 2
+					# Only check Python files (skip for non-Python files)
+					if [[ ! "$file_path" =~ \.py$ ]]; then
+						exit 0
+					fi
+
+					# Run check-only commands (no auto-fixing) using same versions as pre-commit
+					# Redirect output to stderr so Claude Code can display errors properly
+					# Check the file AFTER it was written - much simpler than pre-hook!
+					${pkgs.ruff}/bin/ruff check "$file_path" >&2 || exit 2
+					${python-interp.pkgs.mypy}/bin/mypy "$file_path" >&2 || exit 2
 				'';
 			in {
 				packages = {
@@ -53,7 +61,7 @@
 				devShells.default =
 					pkgs.mkShell {
 						inherit system;
-						buildInputs = with pkgs; [poetry claude-pre-commit-hook] ++ [poetry-app.dependencyEnv];
+						buildInputs = with pkgs; [poetry claude-post-commit-hook] ++ [poetry-app.dependencyEnv];
 					};
 			});
 }
