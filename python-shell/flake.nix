@@ -54,6 +54,13 @@
 				devShells.default =
 					pkgs.mkShell {
 						inherit system;
+						shellHook = ''
+							if [ -f .env ]; then
+								set -a
+								source .env
+								set +a
+							fi
+						'';
 						buildInputs = with pkgs; [python-with-pkgs claude-post-commit-hook];
 					};
 			});

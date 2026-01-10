@@ -147,7 +147,14 @@
 				devShells.default =
 					pkgs.mkShell {
 						inherit system;
-						inherit (pre-commit-check) shellHook;
+						shellHook = ''
+							${pre-commit-check.shellHook}
+							if [ -f .env ]; then
+								set -a
+								source .env
+								set +a
+							fi
+						'';
 						inputsFrom = [self.packages.${system}.default.devShell];
 
 						buildInputs = with pkgs; [claude-post-commit-hook] ++ devPackages;
@@ -156,7 +163,14 @@
 				devShells.no-package =
 					pkgs.mkShell {
 						inherit system;
-						inherit (pre-commit-check) shellHook;
+						shellHook = ''
+							${pre-commit-check.shellHook}
+							if [ -f .env ]; then
+								set -a
+								source .env
+								set +a
+							fi
+						'';
 
 						buildInputs = with pkgs; [python-interp pdm claude-post-commit-hook];
 					};

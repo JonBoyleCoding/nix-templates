@@ -61,6 +61,13 @@
 				devShells.default =
 					pkgs.mkShell {
 						inherit system;
+						shellHook = ''
+							if [ -f .env ]; then
+								set -a
+								source .env
+								set +a
+							fi
+						'';
 						buildInputs = with pkgs; [poetry claude-post-commit-hook] ++ [poetry-app.dependencyEnv];
 					};
 			});
