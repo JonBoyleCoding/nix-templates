@@ -36,6 +36,11 @@
 					description = "A template for Python development with uv/pip and virtual environments";
 				};
 
+				rust = {
+					path = ./rust;
+					description = "A template for Rust development with Nix";
+				};
+
 				default-package-flake = {
 					path = ./default-package-flake;
 					description = "A basic flake for building a default.nix package";
