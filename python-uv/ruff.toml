@@ -1,0 +1,20 @@
+preview = true
+line-length = 120
+
+[lint]
+extend-select = [
+	"I",     # isort
+	"ICN",   # flake8-import-conventions
+	"NPY",   # numpy-specific rules
+	"PLC0415", # import-outside-top-level (detects imports inside functions)
+	"PLR6301", # no-self-use
+	"RET",   # flake8-return
+	"SIM",   # flake8-simplify
+	"TID",   # flake8-tidy-imports
+	"UP",    # pyupgrade (catches type annotation issues)
+	"PYI",   # flake8-pyi (type checking)
+]
+
+[format]
+indent-style = "tab"
+quote-style = "double"

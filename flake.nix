@@ -31,6 +31,11 @@
 					description = "A template for a python project using poetry2nix";
 				};
 
+				python-uv = {
+					path = ./python-uv;
+					description = "A template for Python development with uv/pip and virtual environments";
+				};
+
 				default-package-flake = {
 					path = ./default-package-flake;
 					description = "A basic flake for building a default.nix package";
