@@ -32,6 +32,10 @@
 				python-interp = pkgs.python312;
 				python-interp-pkgs = python-interp.pkgs;
 
+				# Check if project files exist for conditional evaluation
+				hasPyproject = builtins.pathExists ./pyproject.toml;
+				hasLockfile = builtins.pathExists ./pdm.lock;
+
 				# dream2nix
 				module = {
 					config,
@@ -112,12 +116,31 @@
 				in
 					validPackages;
 
+				# Extract mypy from dev group (has access to project dependencies)
+				devMypy =
+					if hasPyproject && hasLockfile
+					then let
+						mypyVersions = package.config.groups.dev.packages.mypy or {};
+						versionsList = builtins.attrValues mypyVersions;
+						firstVersion =
+							if builtins.length versionsList > 0
+							then builtins.head versionsList
+							else null;
+					in
+						if firstVersion != null && firstVersion ? public
+						then firstVersion.public
+						else python-interp-pkgs.mypy
+					else python-interp-pkgs.mypy;
+
 				pre-commit-check =
 					nix-precommit-hooks.lib.${system}.run {
 						src = ./.;
 						hooks = {
 							ruff.enable = true;
-							mypy.enable = true;
+							mypy = {
+								enable = true;
+								settings.binPath = "${devMypy}/bin/mypy";
+							};
 							statix.enable = true;
 						};
 					};
@@ -137,7 +160,7 @@
 					# Redirect output to stderr so Claude Code can display errors properly
 					# Check the file AFTER it was written - much simpler than pre-hook!
 					${pkgs.ruff}/bin/ruff check "$file_path" >&2 || exit 2
-					${python-interp.pkgs.mypy}/bin/mypy "$file_path" >&2 || exit 2
+					${devMypy}/bin/mypy "$file_path" >&2 || exit 2
 				'';
 			in {
 				packages = {
@@ -157,7 +180,7 @@
 						'';
 						inputsFrom = [self.packages.${system}.default.devShell];
 
-						buildInputs = with pkgs; [claude-post-commit-hook] ++ devPackages;
+						buildInputs = with pkgs; [claude-post-commit-hook ruff python-interp-pkgs.mypy] ++ devPackages;
 					};
 
 				devShells.no-package =
