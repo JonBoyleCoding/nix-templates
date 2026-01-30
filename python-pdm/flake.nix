@@ -156,9 +156,9 @@
 						exit 0
 					fi
 
-					# Run check-only commands (no auto-fixing) using same versions as pre-commit
+					# Auto-format first, then run linting checks
 					# Redirect output to stderr so Claude Code can display errors properly
-					# Check the file AFTER it was written - much simpler than pre-hook!
+					${pkgs.ruff}/bin/ruff format "$file_path" >&2 || exit 2
 					${pkgs.ruff}/bin/ruff check "$file_path" >&2 || exit 2
 					${devMypy}/bin/mypy "$file_path" >&2 || exit 2
 				'';

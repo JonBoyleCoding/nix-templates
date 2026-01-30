@@ -74,8 +74,8 @@
 						exit 0
 					fi
 
-					# Run rustfmt check
-					${rust-toolchain}/bin/rustfmt --check "$file_path" >&2 || exit 2
+					# Auto-format with rustfmt
+					${rust-toolchain}/bin/rustfmt "$file_path" >&2 || exit 2
 
 					# Run clippy if Cargo.toml exists
 					if [[ -f "Cargo.toml" ]]; then
