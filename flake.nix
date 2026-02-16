@@ -50,6 +50,11 @@
 					path = ./rust-bevy;
 					description = "A NixOS development flake for Bevy development.";
 				};
+
+				ocaml = {
+					path = ./ocaml;
+					description = "A template for OCaml development with opam-nix";
+				};
 			};
 		}
 		// flake-utils.lib.eachDefaultSystem (system: let
