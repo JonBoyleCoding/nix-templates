@@ -13,3 +13,6 @@ nix flake init -t github:JonBoyleCoding/nix-templates#template
 - `python-shell` A simple shell script containing python and some packages
 - `python-poetry2nix` A template for python package using poetry.
 - `python-uv` A Python development environment with uv/pip and virtual environments
+- `rust` A Rust development environment using fenix and crane
+- `rust-bevy` A Rust development environment for Bevy game engine projects
+- `ocaml` An OCaml development environment using opam-nix
