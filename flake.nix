@@ -55,6 +55,11 @@
 					path = ./ocaml;
 					description = "A template for OCaml development with opam-nix";
 				};
+
+				clojure = {
+					path = ./clojure;
+					description = "A template for Closure development";
+				};
 			};
 		}
 		// flake-utils.lib.eachDefaultSystem (system: let
