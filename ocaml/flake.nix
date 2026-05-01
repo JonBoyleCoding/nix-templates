@@ -40,17 +40,20 @@
 					opam-dune-lint = "*";
 				};
 
-				query = devPackagesQuery // {
-					ocaml-base-compiler = "*";
-				};
+				query =
+					devPackagesQuery
+					// {
+						ocaml-base-compiler = "*";
+					};
 
 				# Build all local packages discovered from .opam files
 				scope = on.buildOpamProject' {} ./. query;
 
 				overlay = final: prev: {
-					${package} = prev.${package}.overrideAttrs (_: {
-						doNixSupport = false;
-					});
+					${package} =
+						prev.${package}.overrideAttrs (_: {
+								doNixSupport = false;
+							});
 				};
 
 				scope' = scope.overrideScope overlay;
@@ -58,9 +61,10 @@
 				# The main package
 				main = scope'.${package};
 
-				devPackages = builtins.attrValues (
-					lib.getAttrs (builtins.attrNames devPackagesQuery) scope'
-				);
+				devPackages =
+					builtins.attrValues (
+						lib.getAttrs (builtins.attrNames devPackagesQuery) scope'
+					);
 
 				pre-commit-check =
 					nix-precommit-hooks.lib.${system}.run {
@@ -73,25 +77,26 @@
 						};
 					};
 
-				claude-post-commit-hook = pkgs.writeShellScriptBin "claude-post-commit-check" ''
-					file_path=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
-					if [[ -z "$file_path" ]] || [[ ! -f "$file_path" ]]; then
-						exit 0
-					fi
+				claude-post-commit-hook =
+					pkgs.writeShellScriptBin "claude-post-commit-check" ''
+						file_path=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
+						if [[ -z "$file_path" ]] || [[ ! -f "$file_path" ]]; then
+							exit 0
+						fi
 
-					# Only check OCaml files
-					if [[ ! "$file_path" =~ \.(ml|mli)$ ]]; then
-						exit 0
-					fi
+						# Only check OCaml files
+						if [[ ! "$file_path" =~ \.(ml|mli)$ ]]; then
+							exit 0
+						fi
 
-					# Auto-format with ocamlformat
-					${pkgs.ocamlPackages.ocamlformat}/bin/ocamlformat --inplace "$file_path" >&2 || exit 2
+						# Auto-format with ocamlformat
+						${pkgs.ocamlPackages.ocamlformat}/bin/ocamlformat --inplace "$file_path" >&2 || exit 2
 
-					# Run dune build for type checking if dune-project exists
-					if [[ -f "dune-project" ]]; then
-						dune build >&2 || exit 2
-					fi
-				'';
+						# Run dune build for type checking if dune-project exists
+						if [[ -f "dune-project" ]]; then
+							dune build >&2 || exit 2
+						fi
+					'';
 			in {
 				legacyPackages = scope';
 
