@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 echo "=== PDM Project Setup ==="
 
+# Stage files so nix can see them (nix reads only git-tracked files)
+stage_for_nix() {
+	git rev-parse --is-inside-work-tree &>/dev/null || return 0
+	for f in "$@"; do
+		[[ -f "$f" ]] && git add "$f"
+	done
+}
+
 # Initialize pyproject.toml if it doesn't exist
 if [[ -f "pyproject.toml" ]]; then
 	echo "pyproject.toml already exists. Skipping pdm init."
@@ -16,6 +24,9 @@ else
 	fi
 fi
 
+# Stage flake files before the lock step (pdm init creates a git repo, leaving them untracked)
+stage_for_nix flake.nix flake.lock ruff.toml pyproject.toml .gitignore
+
 # Generate lock file via dream2nix
 if [[ -f "pyproject.toml" ]]; then
 	echo "Generating pdm.lock via nix..."
@@ -25,13 +36,8 @@ if [[ -f "pyproject.toml" ]]; then
 	fi
 fi
 
-# Make generated files visible to the flake (nix reads only git-tracked files)
-if git rev-parse --is-inside-work-tree &>/dev/null; then
-	echo "Staging generated files so the flake can see them..."
-	for f in pyproject.toml pdm.lock; do
-		[[ -f "$f" ]] && git add "$f"
-	done
-fi
+# Stage the generated lock
+stage_for_nix pdm.lock
 
 # Create .envrc if it doesn't exist
 if [[ ! -f ".envrc" ]]; then
