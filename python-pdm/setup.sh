@@ -25,6 +25,14 @@ if [[ -f "pyproject.toml" ]]; then
 	fi
 fi
 
+# Make generated files visible to the flake (nix reads only git-tracked files)
+if git rev-parse --is-inside-work-tree &>/dev/null; then
+	echo "Staging generated files so the flake can see them..."
+	for f in pyproject.toml pdm.lock; do
+		[[ -f "$f" ]] && git add "$f"
+	done
+fi
+
 # Create .envrc if it doesn't exist
 if [[ ! -f ".envrc" ]]; then
 	echo "Creating .envrc..."
