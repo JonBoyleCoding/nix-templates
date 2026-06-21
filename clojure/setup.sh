@@ -50,6 +50,11 @@ else
 		echo "Error: deps-new did not scaffold the project. Aborting setup." >&2
 		exit 1
 	fi
+
+	# Fill the package placeholders in flake.nix with the project name
+	org="${name%%/*}"
+	app="${name##*/}"
+	sed -i "s|<user>/myapp|$org/$app|; s|<user>\.myapp|$org.$app|" flake.nix
 fi
 
 # Stage files so nix can see them (nix reads only git-tracked files)
