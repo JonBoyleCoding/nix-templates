@@ -40,6 +40,8 @@
 				# 			name = "<user>/myapp";
 				# 			main-ns = "<user>.myapp";
 				# 			jdk = jdk-version;
+				# 			# Run build.clj instead of clj-nix's builder, for asset/codegen builds
+				# 			# buildCommand = "clojure -T:build ci";
 				# 		}
 				# 	];
 				# };
