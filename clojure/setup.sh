@@ -55,6 +55,11 @@ else
 	org="${name%%/*}"
 	app="${name##*/}"
 	sed -i "s|<user>/myapp|$org/$app|; s|<user>\.myapp|$org.$app|" flake.nix
+
+	# Add an nREPL :repl alias to the generated deps.edn
+	if [[ -f deps.edn ]] && ! grep -q ':repl' deps.edn; then
+		sed -i '/:aliases/{n;s|^\([[:space:]]*\){|\1{:repl {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}} :main-opts ["-m" "nrepl.cmdline"]}\n\1 |}' deps.edn
+	fi
 fi
 
 # Stage files so nix can see them (nix reads only git-tracked files)
