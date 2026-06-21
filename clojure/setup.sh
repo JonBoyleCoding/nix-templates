@@ -24,7 +24,7 @@ elif [[ "$mode" == "flat" ]]; then
 	cat >deps.edn <<'EOF'
 {:paths ["."]
  :aliases
- {:repl {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}}
+ {:repl {:extra-deps {nrepl/nrepl {:mvn/version "1.7.0"}}
          :main-opts ["-m" "nrepl.cmdline"]}}}
 EOF
 	if [[ ! -f scratch.clj ]]; then
@@ -58,7 +58,7 @@ else
 
 	# Add an nREPL :repl alias to the generated deps.edn
 	if [[ -f deps.edn ]] && ! grep -q ':repl' deps.edn; then
-		sed -i '/:aliases/{n;s|^\([[:space:]]*\){|\1{:repl {:extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}} :main-opts ["-m" "nrepl.cmdline"]}\n\1 |}' deps.edn
+		sed -i '/:aliases/{n;s|^\([[:space:]]*\){|\1{:repl {:extra-deps {nrepl/nrepl {:mvn/version "1.7.0"}} :main-opts ["-m" "nrepl.cmdline"]}\n\1 |}' deps.edn
 	fi
 fi
 
