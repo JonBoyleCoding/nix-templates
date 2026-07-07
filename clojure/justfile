@@ -1,0 +1,15 @@
+# Generate/update deps-lock.json for nix build
+lock:
+	nix run github:jlesquembre/clj-nix#deps-lock
+
+# Run application
+run:
+	clj -M:run-m
+
+# Start nREPL
+repl:
+	clj -M:repl
+
+# Run tests
+test:
+	clj -T:build test

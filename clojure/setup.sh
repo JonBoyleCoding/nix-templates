@@ -36,30 +36,33 @@ EOF
 EOF
 	fi
 else
-	# Resolve qualified project name: flag or interactive, default user/<dir>
+	# Project name (deps-new receives <name>/<name>), default = current dir
 	name="$name_arg"
-	default_name="${USER:-$(id -un)}/$(basename "$PWD")"
+	default_name="$(basename "$PWD")"
 	if [[ -z "$name" ]]; then
-		read -rp "Project name (org/app) [$default_name]: " name
+		read -rp "Project name [$default_name]: " name
 		name="${name:-$default_name}"
 	fi
-	echo "Running deps-new app into current dir as $name..."
+	echo "Running deps-new app into current dir as $name/$name..."
 	if ! nix develop --command clojure \
 		-Sdeps '{:deps {io.github.seancorfield/deps-new {:git/tag "v0.12.2" :git/sha "465b303"}}}' \
-		-X org.corfield.new/app :name "$name" :target-dir . :overwrite true; then
+		-X org.corfield.new/app :name "$name/$name" :target-dir . :overwrite true; then
 		echo "Error: deps-new did not scaffold the project. Aborting setup." >&2
 		exit 1
 	fi
 
-	# Fill the package placeholders in flake.nix with the project name
-	org="${name%%/*}"
-	app="${name##*/}"
-	sed -i "s|<user>/myapp|$org/$app|; s|<user>\.myapp|$org.$app|" flake.nix
+	# Activate the clj-nix package in flake.nix, then fill the project name
+	sed -i '/# packages.default = clj-nix.lib.mkCljApp {/,/^\t*# };/ s/^\(\t*\)# /\1/' flake.nix
+	sed -i "s|<project>/<project>|$name/$name|g; s|<project>\.<project>|$name.$name|g" flake.nix
 
 	# Add an nREPL :repl alias to the generated deps.edn
 	if [[ -f deps.edn ]] && ! grep -q ':repl' deps.edn; then
 		sed -i '/:aliases/{n;s|^\([[:space:]]*\){|\1{:repl {:extra-deps {nrepl/nrepl {:mvn/version "1.7.0"}} :main-opts ["-m" "nrepl.cmdline"]}\n\1 |}' deps.edn
 	fi
+
+	# Generate deps-lock.json for the nix build
+	echo "Generating deps-lock.json..."
+	nix run github:jlesquembre/clj-nix#deps-lock
 fi
 
 # Stage files so nix can see them (nix reads only git-tracked files)
@@ -67,6 +70,10 @@ if [[ -d ".git" ]]; then
 	echo "Adding files to git..."
 	git add flake.nix
 	[[ -f deps.edn ]] && git add deps.edn
+	[[ -f deps-lock.json ]] && git add deps-lock.json
+	[[ -d src ]] && git add src
+	[[ -f build.clj ]] && git add build.clj
+	[[ -f justfile ]] && git add justfile
 	[[ -d .claude ]] && git add .claude
 fi
 

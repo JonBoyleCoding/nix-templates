@@ -37,8 +37,8 @@
 				# 	modules = [
 				# 		{
 				# 			projectSrc = ./.;
-				# 			name = "<user>/myapp";
-				# 			main-ns = "<user>.myapp";
+				# 			name = "<project>/<project>";
+				# 			main-ns = "<project>.<project>";
 				# 			jdk = jdk-version;
 				# 			# Run build.clj instead of clj-nix's builder, for asset/codegen builds
 				# 			# buildCommand = "clojure -T:build ci";
